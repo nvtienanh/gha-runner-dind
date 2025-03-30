@@ -6,6 +6,11 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
     permissions:
       contents: read
       packages: write
@@ -60,7 +65,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           build-args: |
             RUNNER_ASSETS_DIR=/home/runner
-            TARGETPLATFORM=linux/amd64
+            TARGETPLATFORM=${{ matrix.platform }}
             RUNNER_VERSION=${{ steps.image.outputs.runner_version }}
             RUNNER_CONTAINER_HOOKS_VERSION=${{ steps.image.outputs.runner_container_hooks_version }}
             DOCKER_VERSION=${{ steps.image.outputs.docker_version }}
@@ -69,7 +74,7 @@ jobs:
           cache-to: type=gha,mode=max
           context: .
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64
+          platforms: ${{ matrix.platform }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
@@ -78,3 +83,33 @@ jobs:
           echo $"\
             Digest: ${{ steps.docker_build.outputs.digest }}
             Tags: ${{ steps.meta.outputs.tags }}"
+  
+  trivy:
+    runs-on: ubuntu-24.04
+    needs: docker
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      # Outputs the name of the repository (owner/repo)
+      - name: Build Image Name
+        id: image
+        run: |
+          # The name of the owner and of the repository: owner/repository
+          IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          source VERSION
+          echo "runner_version=$RUNNER_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ghcr.io/${{ steps.image.outputs.image_name }}:${{ steps.image.outputs.runner_version }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
