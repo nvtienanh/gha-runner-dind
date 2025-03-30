@@ -1,3 +1,6 @@
+![Docker build](https://github.com/nvtienanh/gha-runner-dind/actions/workflows/ci.yaml/badge.svg)
+
+
 # Overview
 
 This docker image based on PR: [Enhance ARC runner image dockerfiles for RunnerScaleSet compatibility](https://github.com/actions/actions-runner-controller/pull/2616) to make GitHub ARC run dind mode directly, without using sidecar container.
