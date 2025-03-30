@@ -87,10 +87,8 @@ RUN set -vx; \
     && rm -rf docker docker.tgz
 
 RUN export ARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2) \
-    && if [ "$ARCH" = "arm64" ]; then export ARCH=aarch64 ; fi \
-    && if [ "$ARCH" = "amd64" ] || [ "$ARCH" = "i386" ]; then export ARCH=x86_64 ; fi \
     && mkdir -p /usr/libexec/docker/cli-plugins \
-    && curl -fLo /usr/libexec/docker/cli-plugins/docker-buildx "https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.linux-amd64" \
+    && curl -fLo /usr/libexec/docker/cli-plugins/docker-buildx "https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.linux-${ARCH}" \
     && chmod +x /usr/libexec/docker/cli-plugins/docker-buildx \
     && ln -s /usr/libexec/docker/cli-plugins/docker-buildx /usr/bin/docker-buildx \
     && which docker-buildx \
