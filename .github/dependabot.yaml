@@ -4,6 +4,10 @@ updates:
   - package-ecosystem: "docker"
     # Look for a `Dockerfile` in the `root` directory
     directory: "/"
+    ignore:
+      - dependency-name: "ubuntu"
+        versions:
+          - 24.04
     # Check for updates once a week
     schedule:
       interval: "weekly"
