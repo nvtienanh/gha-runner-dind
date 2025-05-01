@@ -47,12 +47,5 @@ And [Updating the pod specification for the runner pod](https://docs.github.com/
             limits:
               memory: 384Mi
               cpu: 375m
-          volumeMounts:
-            - name: hostedtoolcache
-              mountPath: /opt/hostedtoolcache
-      volumes:
-        - name: hostedtoolcache
-          persistentVolumeClaim:
-            claimName: hostedtoolcache-pvc
 ...
 ```
